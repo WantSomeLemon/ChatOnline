@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  #CƠ SỞ DỮ LIỆU: MONGODB
+  mongodb:
+    image: mongo:7.0
+    container_name: chat_mongodb
+    restart: always
+    ports:
+      - "27017:27017" # Mở port để có thể dùng MongoDB Compass ở máy thật kết nối vào kiểm tra dữ liệu
+    volumes:
+      - mongo_data:/data/db # Giữ lại dữ liệu tin nhắn, tài khoản kể cả khi tắt hoặc xóa container
+    networks:
+      - chat-network
+
+  #BỘ NHỚ ĐỆM: REDIS
+  redis:
+    image: redis:7.2-alpine
+    container_name: chat_redis
+    restart: always
+    ports:
+      - "6379:6379" # Mở port để công cụ quản lý Redis hoặc backend kết nối
+    volumes:
+      - redis_data:/data # Lưu trữ cấu hình tạm thời bền vững
+    networks:
+      - chat-network
+
+  #BACKEND (SPRING BOOT)
+  backend:
+    image: eclipse-temurin:22-jdk-slim # Sử dụng môi trường Java 22 siêu nhẹ để chạy file .jar
+    container_name: chat_backend
+    restart: always
+    ports:
+      - "8080:8080" # Cổng chạy API REST và WebSocket của Spring Boot
+    volumes:
+      - ./backend/target/backend-1.0.0-SNAPSHOT.jar:/app/backend.jar # Gắn trực tiếp file build Maven vào container
+    working_dir: /app
+    command: java -jar backend.jar # Câu lệnh khởi chạy ứng dụng backend
+    depends_on:
+      - mongodb # Chỉ khởi động backend sau khi container mongodb đã chạy thành công
+      - redis   # Chỉ khởi động backend sau khi container redis đã chạy thành công
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/chatdb # Cấu hình động kết nối Mongo nội bộ
+      - SPRING_DATA_REDIS_HOST=redis                           # Cấu hình động kết nối Redis nội bộ
+      - SPRING_DATA_REDIS_PORT=6379
+    networks:
+      - chat-network
+
+  # 4. DỊCH VỤ GIAO DIỆN: FRONTEND (NGINX ĐÓNG GÓI ANGULAR)
+  frontend:
+    image: nginx:alpine # Sử dụng máy chủ Web Nginx siêu nhẹ để phục vụ code Angular tĩnh
+    container_name: chat_frontend
+    restart: always
+    ports:
+      - "80:80" # Người dùng truy cập giao diện qua cổng 80 (http://localhost)
+    volumes:
+      - ./frontend/dist/frontend/browser:/usr/share/nginx/html # Gắn thư mục build tĩnh của Angular vào Nginx
+    depends_on:
+      - backend # Chỉ khởi động giao diện khi backend đã sẵn sàng
+    networks:
+      - chat-network
+
+# ĐỊNH NGHĨA VÙNG LƯU TRỮ BỀN VỮNG (VOLUMES)
+volumes:
+  mongo_data:
+  redis_data:
+
+# ĐỊNH NGHĨA MẠNG NỘI BỘ (NETWORKS)
+networks:
+  chat-network:
+    driver: bridge
