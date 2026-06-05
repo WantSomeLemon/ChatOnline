@@ -1,0 +1,50 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: chat-online-backend
+
+  # -----------------------------------------------------------------
+  # CẤU HÌNH CƠ SỞ DỮ LIỆU MONGODB
+  # -----------------------------------------------------------------
+  data:
+    mongodb:
+      # Khi chạy trên IntelliJ (Local), kết nối tới localhost:27017
+      # Khi chạy trên Docker, biến môi trường trong docker-compose sẽ tự đè địa chỉ này thành máy chủ 'mongodb'
+      uri: mongodb://localhost:27017/chatdb
+    
+    # -----------------------------------------------------------------
+    # CẤU HÌNH BỘ NHỚ ĐỆM REDIS (Quản lý User Online/Offline, Cache Session)
+    # -----------------------------------------------------------------
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 6000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+  # -----------------------------------------------------------------
+  # CẤU HÌNH MULTIPART (Giới hạn dung lượng ảnh/video gửi qua Chat)
+  # -----------------------------------------------------------------
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB       # Dung lượng tối đa cho 1 file tải lên
+      max-request-size: 10MB    # Dung lượng tối đa cho 1 request chat gửi đi
+
+# -------------------------------------------------------------------
+# CẤU HÌNH LOGGING (hệ thống khi chạy thực tế)
+# -------------------------------------------------------------------
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.springframework.data.mongodb: INFO
+    # Bật LOG DEBUG riêng cho cụm WebSocket để dễ kiểm tra luồng kết nối thời gian thực
+    org.springframework.web.socket: DEBUG
