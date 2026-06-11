@@ -21,8 +21,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   messageContent: string = '';
   messagesList: any[] = [];
 
-  private anonymousMap = new Map<string, string>();
-  private anonymousCounter = 1;
+  private userMap = new Map<string, string>();
 
   private connectionSubscription!: Subscription;
   private messageSubscription!: Subscription;
@@ -35,19 +34,41 @@ export class ChatComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.initCurrentUserAndLoadChat();
+    this.loadAllUsers().then(() => {
+      this.initCurrentUserAndLoadChat();
+    });
+  }
+
+  private loadAllUsers(): Promise<void> {
+    return new Promise((resolve) => {
+      this.http.get<any[]>(`http://localhost:8080/api/chat/users`).subscribe({
+        next: (users) => {
+          users.forEach((user) => this.userMap.set(user.id, user.username));
+          console.log('--- ĐÃ TẢI DANH SÁCH USER VÀO MAP');
+          resolve();
+        },
+        error: (err) => {
+          console.error('Lỗi khi tải danh sách user:', err);
+          resolve();
+        },
+      });
+    });
   }
 
   private initCurrentUserAndLoadChat(): void {
     const myUsername = 'Bách';
     console.log(`--- ĐANG GỌI API LOGIN-QUICK CHO USERNAME: [${myUsername}] ĐỂ LẤY ID THẬT...`);
 
-    this.http.post<any>(`http://localhost:8080/api/chat/login-quick?username=${myUsername}`, {})
+    this.http
+      .post<any>(`http://localhost:8080/api/chat/login-quick?username=${myUsername}`, {})
       .subscribe({
         next: (userFromDocker) => {
           if (userFromDocker && userFromDocker.id) {
             this.currentUserId = userFromDocker.id;
-            console.log(`--- THÀNH CÔNG: ID thật trong Docker của bạn (${myUsername}) là:`, this.currentUserId);
+            console.log(
+              `--- THÀNH CÔNG: ID thật trong Docker của bạn (${myUsername}) là:`,
+              this.currentUserId,
+            );
           } else {
             this.currentUserId = 'USER_TAM_THOI';
             console.warn('--- CẢNH BÁO: Không nhận được ID từ API, dùng fallback USER_TAM_THOI');
@@ -60,7 +81,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
           this.currentUserId = 'USER_TAM_THOI';
           this.extractRoomIdFromUrl();
-        }
+        },
       });
   }
 
@@ -69,11 +90,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     console.log('--- KÍCH HOẠT PHÒNG CHAT: ID bóc trực tiếp từ URL là:', idFromUrl);
 
     if (idFromUrl) {
-      if (this.roomId !== idFromUrl) {
-        this.messagesList = [];
-        this.anonymousMap.clear();
-        this.anonymousCounter = 1;
-      }
       this.roomId = idFromUrl;
       this.loadRoomInfo(idFromUrl);
       this.startChatSession();
@@ -85,13 +101,19 @@ export class ChatComponent implements OnInit, OnDestroy {
   private loadRoomInfo(id: string): void {
     this.http.get<any>(`http://localhost:8080/api/chat/room/${id}`).subscribe({
       next: (room) => {
-        // Giả sử backend trả về object có thuộc tính 'name'
-        this.roomName = room.name || 'Phòng chat không tên';
+        if (room.name && room.name !== '') {
+          this.roomName = room.name;
+        } else if (room.memberIds && this.currentUserId) {
+          const partnerId = room.memberIds.find((id: string) => id !== this.currentUserId);
+          this.roomName = this.userMap.get(partnerId) || 'Người lạ';
+        } else {
+          this.roomName = 'Phòng chat';
+        }
       },
       error: (err) => {
         console.error('Lỗi khi lấy thông tin phòng:', err);
         this.roomName = 'Lỗi tải tên phòng';
-      }
+      },
     });
   }
 
@@ -101,23 +123,21 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.loadMessageHistory();
     this.resetExistingConnections();
     this.connectAndListenToWebSocket();
-
   }
 
   private loadMessageHistory(): void {
-    this.http.get<any[]>(`http://localhost:8080/api/chat/room/${this.roomId}/messages`)
-      .subscribe({
-        next: (historyMessages) => {
-          console.log('--- ĐÃ LẤY LỊCH SỬ TIN NHẮN TỪ DOCKER DB: ', historyMessages);
-          if(historyMessages){
-            this.messagesList = historyMessages.map(msg => this.processMessageSenderName(msg));
-          } else {
-            this.messagesList = [];
-          }
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Lỗi khi tải lịch sử chat:', err)
-      })
+    this.http.get<any[]>(`http://localhost:8080/api/chat/room/${this.roomId}/messages`).subscribe({
+      next: (historyMessages) => {
+        console.log('--- ĐÃ LẤY LỊCH SỬ TIN NHẮN TỪ DOCKER DB: ', historyMessages);
+        if (historyMessages) {
+          this.messagesList = historyMessages.map((msg) => this.processMessageSenderName(msg));
+        } else {
+          this.messagesList = [];
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Lỗi khi tải lịch sử chat:', err),
+    });
   }
 
   private connectAndListenToWebSocket(): void {
@@ -149,27 +169,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   private processMessageSenderName(msg: any): any {
     if (!msg) return msg;
 
-    if (msg.senderId === this.currentUserId || msg.senderId === 'USER_TAM_THOI') {
-      msg.displayUsername = 'Bách';
+    if (msg.senderId === this.currentUserId) {
+      msg.displayUsername = 'Bách'; // Hoặc tên của bạn
+    } else {
+      // Thay vì dùng anonymousMap, hãy lấy tên từ Map user bạn đã lưu sẵn
+      msg.displayUsername = this.userMap.get(msg.senderId) || 'Người lạ';
     }
-    else {
-      const rawSenderId = msg.senderId || 'unknown';
-
-
-      if (!this.anonymousMap.has(rawSenderId)) {
-        if (this.anonymousCounter === 1) {
-          this.anonymousMap.set(rawSenderId, 'An');
-        } else if (this.anonymousCounter === 2) {
-          this.anonymousMap.set(rawSenderId, 'Binh');
-        } else {
-          this.anonymousMap.set(rawSenderId, `Anonymous${this.anonymousCounter - 2}`);
-        }
-        this.anonymousCounter++;
-      }
-
-      msg.displayUsername = this.anonymousMap.get(rawSenderId);
-    }
-
     return msg;
   }
 
@@ -192,8 +197,10 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     console.log(
-      '--- KIỂM TRA TRƯỚC KHI GỬI: roomId =', this.roomId,
-      ' | userId =', this.currentUserId,
+      '--- KIỂM TRA TRƯỚC KHI GỬI: roomId =',
+      this.roomId,
+      ' | userId =',
+      this.currentUserId,
     );
 
     if (!this.roomId) {
