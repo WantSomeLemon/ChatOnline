@@ -32,20 +32,36 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.currentUserId = localStorage.getItem('userId') || 'USER_TAM_THOI';
 
     //  CHỈ DÙNG LUỒNG LẮNG NGHE ĐỘNG
-    this.route.paramMap.subscribe((params) => {
-      const idFromUrl = params.get('id');
-      console.log('--- KÍCH HOẠT PHÒNG CHAT: ID từ URL là:', idFromUrl);
+    // this.route.paramMap.subscribe((params) => {
+    //   const idFromUrl = params.get('id');
+    //   console.log('--- KÍCH HOẠT PHÒNG CHAT: ID từ URL là:', idFromUrl);
+    //
+    //
+    //
+    //   if (idFromUrl) {
+    //     // Nếu chuyển sang phòng mới, xóa sạch danh sách tin nhắn cũ trên màn hình đi
+    //     if (this.roomId !== idFromUrl) {
+    //       this.messagesList = [];
+    //     }
+    //
+    //     this.roomId = idFromUrl;
+    //     this.startChatSession();
+    //   }
+    // });
 
-      if (idFromUrl) {
-        // Nếu chuyển sang phòng mới, xóa sạch danh sách tin nhắn cũ trên màn hình đi
-        if (this.roomId !== idFromUrl) {
-          this.messagesList = [];
-        }
+    const idFromUrl = this.route.snapshot.paramMap.get('id');
+    console.log('--- KÍCH HOẠT PHÒNG CHAT: ID bóc trực tiếp từ URL là:', idFromUrl);
 
-        this.roomId = idFromUrl;
-        this.startChatSession();
+    if (idFromUrl) {
+      if (this.roomId !== idFromUrl) {
+        this.messagesList = [];
       }
-    });
+      this.roomId = idFromUrl;
+      this.startChatSession();
+    } else {
+      console.log('--- URL không có ID phòng. Luồng xử lý lỗi hoặc Room ảo.');
+    }
+
   }
 
   startChatSession(): void {

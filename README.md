@@ -152,3 +152,70 @@ Hệ thống được tổ chức phân rã theo các module cấu trúc độc 
 * **frontend (Tầng hiển thị thiết bị)**
     * *Source & Components:* `src/app/components/chat` — Thành phần quản lý tệp hiển thị HTML, mã xử lý logic TypeScript và phong cách CSS của giao diện khung chat di động.
     * *Services:* `src/app/services` — Dịch vụ quản lý luồng dữ liệu phản ứng RxJS, chịu trách nhiệm thiết lập và duy trì cổng kết nối mạng StompJS / SockJS Client.
+
+---
+
+# 🛠️ Hướng Dẫn Cấu Hình Khởi Chạy Hệ Thống "1-Click" Bằng IntelliJ IDEA
+
+Để không phải mở nhiều Terminal chạy từng dịch vụ một cách thủ công, 
+hướng dẫn này giúp bạn thiết lập một cấu hình chạy hợp nhất (**Compound Run Configuration**). 
+Khi bạn nhấn `Shift + F10`, IntelliJ IDEA sẽ tự động kích hoạt tuần tự:
+**Hạ tầng Docker (MongoDB) ➡️ Backend (Spring Boot)
+➡️ Frontend (Angular)**.
+
+### Các bước cài đặt trực tiếp vào cấu hình Backend:
+
+### 🐳 Bước 1: Tạo Cấu Hình Chạy Docker (MongoDB)
+
+Tạo cấu hình này để IntelliJ có thể tự khởi động container database ngầm:
+1. Ở góc trên bên phải màn hình IntelliJ, bấm vào thanh menu thả xuống 
+(cạnh các nút Run/Debug) ➡️ Chọn **Edit Configurations...**.
+2. Bấm vào biểu tượng dấu cộng **`+`** ở góc trái cửa sổ 
+➡️ Kéo xuống tìm mục **Docker** ➡️ Chọn **Docker Compose**.
+3. Điền các thông số cấu hình:
+    * **Name:** Điền tên là `Run Database`
+    * **Compose files:** Bấm vào biểu tượng thư mục, 
+trỏ đến chính xác tệp `compose.yaml` (hoặc `docker-compose.yml`)
+trong dự án của bạn.
+4. Bấm **Apply** để lưu lại.
+
+
+### 📦 Bước 2: Tạo Cấu Hình Chạy Frontend Angular (npm)
+
+Tạo cấu hình để IntelliJ tự động thực thi lệnh kích hoạt cổng `localhost:4200`:
+1. Tiếp tục bấm vào biểu tượng dấu cộng **`+`** ở góc trái cửa sổ *Run/Debug Configurations*.
+2. Kéo xuống phía dưới tìm và chọn mục **npm**.
+3. Điền chính xác các thông số giao diện như sau:
+    * **Name:** Điền tên là `Run Frontend`
+    * **package.json:** Bấm chọn biểu tượng thư mục, trỏ thẳng vào tệp `package.json` nằm bên trong thư mục con `frontend` (`...\ChatOnline\frontend\package.json`).
+    * **Command:** Chọn lệnh `run` từ menu thả xuống.
+    * **Scripts:** Chọn đúng mã lệnh `start` (Mã lệnh khởi chạy server Angular).
+4. Bấm **Apply** để lưu lại.
+
+
+### ☕ Bước 3: Gộp Docker Và Frontend Vào Cấu Hình Backend (Spring Boot)
+
+Đây là bước cốt lõi để lồng ghép các dịch vụ chạy đồng thời thông qua tính năng **Before launch** (Chạy trước khi khởi động) của file Main Backend:
+
+1. Tại danh sách cấu hình bên trái cửa sổ, tìm đến mục **Spring Boot** (hoặc **Application**) ➡️ Chọn đúng cấu hình chạy của file Main backend của bạn (thường tên là `ChatOnlineApplication`).
+2. Nhìn sang khung giao diện bên phải, cuộn xuống dưới cùng tìm mục có tên là **Before launch: Activate tool window, Ant target, etc.**
+3. Bấm vào biểu tượng dấu cộng **`+`** nhỏ nằm ngay trong mục này:
+    * **Gộp Docker:** Chọn dòng **Run Another Configuration** ➡️ Chọn cấu hình `Run Database` đã tạo ở Bước 1.
+    * **Gộp Frontend:** Chọn tiếp dòng **Run Another Configuration** ➡️ Chọn cấu hình `Run Frontend` đã tạo ở Bước 2.
+4. **Sắp xếp thứ tự thực thi (Quan trọng):** Đảm bảo thứ tự các dòng hiển thị trong khung *Before launch* xếp từ trên xuống dưới chính xác như sau:
+    1. `Run Database` (Mồi cho database lên trước)
+    2. `Run Frontend` (Kích hoạt Angular chạy song song)
+    3. `Build` (Lệnh build code Java mặc định của hệ thống)
+5. Bấm **Apply** và bấm **OK** để đóng bảng lại.
+
+
+### 🚀 Cách Vận Hành Sau Khi Cấu Hình
+
+Từ bây giờ, bạn không cần quan tâm đến Terminal hay các tab khác nữa. Mỗi khi mở dự án ra làm việc:
+1. Bạn chỉ cần chọn cấu hình file Main (`ChatOnlineApplication`) ở góc phải màn hình.
+2. Nhấn tổ hợp phím tắt **`Shift + F10`**.
+
+**Kết quả:** IntelliJ IDEA sẽ tự bật Docker MongoDB lên trước
+➡️ Tự chạy lệnh biên dịch Angular cho Frontend lên sau
+➡️ Cuối cùng file Java Main tự động chạy để kết nối toàn bộ hệ thống.
+Mọi thứ hoạt động trơn tru chỉ với 1 lần bấm duy nhất!
