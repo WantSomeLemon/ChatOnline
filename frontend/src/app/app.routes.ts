@@ -1,7 +1,8 @@
 import {Router, Routes} from '@angular/router';
 import { ChatComponent } from './components/chat/chat.component';
 import {Component, OnInit} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, provideHttpClient} from '@angular/common/http';
+import {ChatRoomComponent} from './components/chat-room/chat-room';
 
 
 @Component({
@@ -38,5 +39,7 @@ export const routes: Routes = [
   { path: '', component: RouteInitializerComponent },
 
   // Route động bóc tách ID phòng chat
-  { path: 'room/:id', component: ChatComponent },
+  // { path: 'room/:id', component: ChatComponent },
+  { path: 'room/:id', component: ChatRoomComponent },
+
 ];
