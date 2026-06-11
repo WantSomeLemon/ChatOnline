@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Chống lỗi chặn cổng CORS khi Angular kết nối tới
 public class ChatController {
 
     private final ChatService chatService;

@@ -3,7 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { ChatService } from '../../services/chat.service';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common'; // Thêm để hỗ trợ hiển thị danh sách nếu cần
+import { CommonModule } from '@angular/common';
+import {HttpClient} from '@angular/common/http'; // Thêm để hỗ trợ hiển thị danh sách nếu cần
 
 @Component({
   selector: 'app-chat',
@@ -26,28 +27,11 @@ export class ChatComponent implements OnInit, OnDestroy {
     private chatService: ChatService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
+    private http: HttpClient,
   ) {}
 
   ngOnInit(): void {
     this.currentUserId = localStorage.getItem('userId') || 'USER_TAM_THOI';
-
-    //  CHỈ DÙNG LUỒNG LẮNG NGHE ĐỘNG
-    // this.route.paramMap.subscribe((params) => {
-    //   const idFromUrl = params.get('id');
-    //   console.log('--- KÍCH HOẠT PHÒNG CHAT: ID từ URL là:', idFromUrl);
-    //
-    //
-    //
-    //   if (idFromUrl) {
-    //     // Nếu chuyển sang phòng mới, xóa sạch danh sách tin nhắn cũ trên màn hình đi
-    //     if (this.roomId !== idFromUrl) {
-    //       this.messagesList = [];
-    //     }
-    //
-    //     this.roomId = idFromUrl;
-    //     this.startChatSession();
-    //   }
-    // });
 
     const idFromUrl = this.route.snapshot.paramMap.get('id');
     console.log('--- KÍCH HOẠT PHÒNG CHAT: ID bóc trực tiếp từ URL là:', idFromUrl);
@@ -66,6 +50,15 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   startChatSession(): void {
     console.log('--- Chuẩn bị kết nối WebSocket với roomId:', this.roomId);
+
+    this.http.get<any[]>(`http://localhost:8080/api/chat/room/${this.roomId}/messages`)
+      .subscribe({
+        next: (historyMessages) =>{
+          console.log('--- ĐÃ LẤY LỊCH SỬ TIN NHẮN TỪ DOCKER DB:', historyMessages);
+          this.messagesList = historyMessages || [];
+          this.cdr.detectChanges();
+        }
+      })
 
     // 1. NGẮT KẾT NỐI CŨ TRƯỚC (Quan trọng: Tránh mở nhiều Socket chồng lên nhau)
     this.chatService.disconnect();
