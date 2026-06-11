@@ -19,5 +19,11 @@ public interface ChatService {
      * @return Danh sách các Message xếp theo thứ tự thời gian tăng dần
      */
     List<Message> getMessageHistory(String roomId);
-    
+
+    /**
+     * Tìm kiếm thông tin chi tiết một phòng chat theo ID.
+     * @param roomId ID định danh của phòng chat
+     * @return ChatRoom tìm thấy hoặc null nếu không tồn tại
+     */
+    ChatRoom findRoomById(String roomId);
 }

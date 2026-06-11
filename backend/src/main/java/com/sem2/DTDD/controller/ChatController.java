@@ -62,4 +62,13 @@ public class ChatController {
     public ResponseEntity<List<Message>> getRoomMessages(@PathVariable("roomId") String roomId) {
         return ResponseEntity.ok(chatService.getMessageHistory(roomId));
     }
+
+    /**
+     * API lấy thông tin chi tiết một phòng chat (bao gồm tên phòng).
+     * Đường dẫn: GET http://localhost:8080/api/chat/room/{roomId}
+     */
+    @GetMapping("/room/{roomId}")
+    public ResponseEntity<ChatRoom> getRoomById(@PathVariable("roomId") String roomId) {
+        return ResponseEntity.ok(chatService.findRoomById(roomId));
+    }
 }

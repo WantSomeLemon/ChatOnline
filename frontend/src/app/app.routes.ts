@@ -39,7 +39,7 @@ export const routes: Routes = [
   { path: '', component: RouteInitializerComponent },
 
   // Route động bóc tách ID phòng chat
-  // { path: 'room/:id', component: ChatComponent },
-  { path: 'room/:id', component: ChatRoomComponent },
+  { path: 'room/:id', component: ChatComponent },
+  // { path: 'room/:id', component: ChatRoomComponent },
 
 ];

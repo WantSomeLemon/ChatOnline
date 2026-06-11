@@ -13,7 +13,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 1. Endpoint cũ dành cho Angular (có SockJS)
         registry.addEndpoint("/ws-chat")
-                .setAllowedOriginPatterns("http://localhost:4200") //cứng thử
+                .setAllowedOriginPatterns("*") //cứng thử
                 .withSockJS();
 
         // 2. BỔ SUNG THÊM: Endpoint mới dành riêng cho Postman và Mobile App (WebSocket thuần)

@@ -25,4 +25,11 @@ public class ChatServiceImpl implements ChatService {
     public List<Message> getMessageHistory(String roomId) {
         return messageRepository.findByRoomIdOrderByTimestampAsc(roomId);
     }
+
+    @Override
+    public ChatRoom findRoomById(String roomId) {
+        // Sử dụng phương thức findById của Spring Data MongoDB
+        return chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng chat với ID: " + roomId));
+    }
 }

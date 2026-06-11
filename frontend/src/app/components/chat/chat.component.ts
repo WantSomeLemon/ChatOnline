@@ -15,6 +15,7 @@ import {HttpClient} from '@angular/common/http';
 })
 export class ChatComponent implements OnInit, OnDestroy {
   roomId!: string;
+  roomName: string = 'Loading...';
   currentUserId!: string;
 
   messageContent: string = '';
@@ -74,10 +75,24 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.anonymousCounter = 1;
       }
       this.roomId = idFromUrl;
+      this.loadRoomInfo(idFromUrl);
       this.startChatSession();
     } else {
       console.log('--- URL không có ID phòng. Luồng xử lý lỗi hoặc Room ảo.');
     }
+  }
+
+  private loadRoomInfo(id: string): void {
+    this.http.get<any>(`http://localhost:8080/api/chat/room/${id}`).subscribe({
+      next: (room) => {
+        // Giả sử backend trả về object có thuộc tính 'name'
+        this.roomName = room.name || 'Phòng chat không tên';
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy thông tin phòng:', err);
+        this.roomName = 'Lỗi tải tên phòng';
+      }
+    });
   }
 
   startChatSession(): void {
