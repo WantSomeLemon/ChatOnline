@@ -31,7 +31,7 @@ public class ChatWebSocketController {
      * </ol>
      */
     @MessageMapping("/chat.sendMessage/{roomId}")
-    public void sendMessage(@DestinationVariable String roomId, @Payload Message message) {
+    public void sendMessage(@DestinationVariable("roomId") String roomId, @Payload Message message) {
         // 1. Chuẩn hóa lại thông tin tin nhắn trước khi lưu
         message.setRoomId(roomId);
         message.setTimestamp(LocalDateTime.now()); // Gắn thời gian thực tại hệ thống

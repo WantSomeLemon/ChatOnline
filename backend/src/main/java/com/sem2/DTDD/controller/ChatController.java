@@ -27,7 +27,7 @@ public class ChatController {
      * @return ResponseEntity chứa thông tin User để Angular lưu lại Session hoạt động
      */
     @PostMapping("/login-quick")
-    public ResponseEntity<User> loginQuick(@RequestParam String username) {
+    public ResponseEntity<User> loginQuick(@RequestParam("username") String username) {
         return ResponseEntity.ok(userService.loginQuick(username));
     }
 
@@ -59,7 +59,7 @@ public class ChatController {
      * @return ResponseEntity chứa danh sách mảng các tin nhắn cũ xếp theo thời gian tăng dần
      */
     @GetMapping("/room/{roomId}/messages")
-    public ResponseEntity<List<Message>> getRoomMessages(@PathVariable String roomId) {
+    public ResponseEntity<List<Message>> getRoomMessages(@PathVariable("roomId") String roomId) {
         return ResponseEntity.ok(chatService.getMessageHistory(roomId));
     }
 }

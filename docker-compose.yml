@@ -25,40 +25,40 @@ services:
     networks:
       - chat-network
 
-  #BACKEND (SPRING BOOT)
-  backend:
-    image: eclipse-temurin:22-jdk-slim # Sử dụng môi trường Java 22 siêu nhẹ để chạy file .jar
-    container_name: chat_backend
-    restart: always
-    ports:
-      - "8080:8080" # Cổng chạy API REST và WebSocket của Spring Boot
-    volumes:
-      - ./backend/target/backend-1.0.0-SNAPSHOT.jar:/app/backend.jar # Gắn trực tiếp file build Maven vào container
-    working_dir: /app
-    command: java -jar backend.jar # Câu lệnh khởi chạy ứng dụng backend
-    depends_on:
-      - mongodb # Chỉ khởi động backend sau khi container mongodb đã chạy thành công
-      - redis   # Chỉ khởi động backend sau khi container redis đã chạy thành công
-    environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/chatdb # Cấu hình động kết nối Mongo nội bộ
-      - SPRING_DATA_REDIS_HOST=redis                           # Cấu hình động kết nối Redis nội bộ
-      - SPRING_DATA_REDIS_PORT=6379
-    networks:
-      - chat-network
-
-  # 4. DỊCH VỤ GIAO DIỆN: FRONTEND (NGINX ĐÓNG GÓI ANGULAR)
-  frontend:
-    image: nginx:alpine # Sử dụng máy chủ Web Nginx siêu nhẹ để phục vụ code Angular tĩnh
-    container_name: chat_frontend
-    restart: always
-    ports:
-      - "80:80" # Người dùng truy cập giao diện qua cổng 80 (http://localhost)
-    volumes:
-      - ./frontend/dist/frontend/browser:/usr/share/nginx/html # Gắn thư mục build tĩnh của Angular vào Nginx
-    depends_on:
-      - backend # Chỉ khởi động giao diện khi backend đã sẵn sàng
-    networks:
-      - chat-network
+#  #BACKEND (SPRING BOOT)
+#  backend:
+#    image: eclipse-temurin:22-slim # Sử dụng môi trường Java 22 siêu nhẹ để chạy file .jar
+#    container_name: chat_backend
+#    restart: always
+#    ports:
+#      - "8080:8080" # Cổng chạy API REST và WebSocket của Spring Boot
+#    volumes:
+#      - ./backend/target/backend-1.0.0-SNAPSHOT.jar:/app/backend.jar # Gắn trực tiếp file build Maven vào container
+#    working_dir: /app
+#    command: java -jar backend.jar # Câu lệnh khởi chạy ứng dụng backend
+#    depends_on:
+#      - mongodb # Chỉ khởi động backend sau khi container mongodb đã chạy thành công
+#      - redis   # Chỉ khởi động backend sau khi container redis đã chạy thành công
+#    environment:
+#      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/chatdb # Cấu hình động kết nối Mongo nội bộ
+#      - SPRING_DATA_REDIS_HOST=redis                           # Cấu hình động kết nối Redis nội bộ
+#      - SPRING_DATA_REDIS_PORT=6379
+#    networks:
+#      - chat-network
+#
+#  # 4. DỊCH VỤ GIAO DIỆN: FRONTEND (NGINX ĐÓNG GÓI ANGULAR)
+#  frontend:
+#    image: nginx:alpine # Sử dụng máy chủ Web Nginx siêu nhẹ để phục vụ code Angular tĩnh
+#    container_name: chat_frontend
+#    restart: always
+#    ports:
+#      - "80:80" # Người dùng truy cập giao diện qua cổng 80 (http://localhost)
+#    volumes:
+#      - ./frontend/dist/frontend/browser:/usr/share/nginx/html # Gắn thư mục build tĩnh của Angular vào Nginx
+#    depends_on:
+#      - backend # Chỉ khởi động giao diện khi backend đã sẵn sàng
+#    networks:
+#      - chat-network
 
 # ĐỊNH NGHĨA VÙNG LƯU TRỮ BỀN VỮNG (VOLUMES)
 volumes:
