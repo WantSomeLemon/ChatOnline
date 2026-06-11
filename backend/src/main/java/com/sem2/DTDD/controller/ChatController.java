@@ -54,6 +54,7 @@ public class ChatController {
     /**
      * API truy xuất toàn bộ lịch sử tin nhắn cũ của một phòng chat cụ thể để hiển thị lên khung chat.
      * Đường dẫn gọi API: <b>GET http://localhost:8080/api/chat/room/{roomId}/messages</b>
+     * Đường dẫn gọi API postman: <b>GET http://localhost:8080/api/chat/room/:roomId/messages</b>
      * @param roomId ID định danh của phòng chat cần lấy dữ liệu tin nhắn cũ
      * @return ResponseEntity chứa danh sách mảng các tin nhắn cũ xếp theo thời gian tăng dần
      */
