@@ -1,0 +1,160 @@
+{
+  "info": {
+    "_postman_id": "66740821-0597-491e-b8a7-0a02934f56cb",
+    "name": "ChatOnline",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55535983",
+    "_collection_link": "https://go.postman.co/collection/55535983-66740821-0597-491e-b8a7-0a02934f56cb?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "loginQuick/username = ...",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Successful POST request\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"name\": \"Add your name in the body\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/chat/login-quick?username=Binh",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "chat",
+            "login-quick"
+          ],
+          "query": [
+            {
+              "key": "username",
+              "value": "Binh"
+            }
+          ]
+        },
+        "description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+      },
+      "response": []
+    },
+    {
+      "name": "createRoom",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"memberIds\": [\r\n        \"6a2a9b54d108d32044bec9bc\",\r\n        \"6a2a9c18d108d32044bec9bd\"\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/chat/room",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "chat",
+            "room"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getRoomMessages",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/chat/room/:roomId/messages",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "chat",
+            "room",
+            ":roomId",
+            "messages"
+          ],
+          "variable": [
+            {
+              "key": "roomId",
+              "value": "6a2ae8f2b0d433359357cd37"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getAllUser",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/chat/users",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "chat",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Web Socket, ng dung khac gui trong 1 room",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "DAG KO THU DC BANG WebSocket",
+          "host": [
+            "DAG KO THU DC BANG WebSocket"
+          ]
+        },
+        "description": "**f12 sang tab console**\n\nlam cac buoc sau, nhap r nhan enter\n\n**buoc 1:**  \nvar ws = new WebSocket(\"ws://localhost:8080/api/ws-chat-raw\");  \nws.onmessage = function(event) { console.log(\"Server trả về: \", event.data); };\n\nws.onopen = function() {  \n// Gửi lệnh CONNECT chuẩn chỉnh kèm ký tự Null mã máy \\\\u0000  \nvar connectFrame = \"CONNECT\\\\naccept-version:1.1,1.2\\\\nheart-beat:0,0\\\\n\\\\n\\\\u0000\";  \nws.send(connectFrame);  \n};\n\n**buoc 2:**  \nvar chatRoomId = \"NHAP_ROOMID_TREN_THANH_URL_VAO_DAY\";  \nvar payload = {  \nsenderId: \"6a2a9b54d108d32044bec9bc\",  \ncontent: \"Chào Bách, mình là An đây! Mình đang nhắn từ Console Trình duyệt nè.\",  \ntimestamp: new Date().toISOString()  \n};\n\nvar sendFrame = \"SEND\\\\ndestination:/app/chat.sendMessage/\" + chatRoomId + \"\\\\ncontent-type:application/json\\\\n\\\\n\" + JSON.stringify(payload) + \"\\\\u0000\";  \nws.send(sendFrame);"
+      },
+      "response": []
+    }
+  ]
+}

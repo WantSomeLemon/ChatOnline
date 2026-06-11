@@ -1,6 +1,7 @@
 package com.sem2.DTDD.controller;
 
 import com.sem2.DTDD.model.Message;
+import com.sem2.DTDD.model.MessageType;
 import com.sem2.DTDD.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -35,6 +36,10 @@ public class ChatWebSocketController {
         // 1. Chuẩn hóa lại thông tin tin nhắn trước khi lưu
         message.setRoomId(roomId);
         message.setTimestamp(LocalDateTime.now()); // Gắn thời gian thực tại hệ thống
+
+        if (message.getType() == null) {
+            message.setType(MessageType.TEXT);
+        }
 
         // 2. Lưu tin nhắn vào cơ sở dữ liệu MongoDB để làm lịch sử chat (History)
         Message savedMessage = messageRepository.save(message);
